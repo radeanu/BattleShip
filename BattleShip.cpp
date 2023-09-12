@@ -1,5 +1,7 @@
-#include "pch.h"
-#include <windows.h>
+// #include "pch.h"
+#include <chrono>
+#include <thread>
+#include <unistd.h>
 #include <iomanip>
 #include <iostream>
 #include <string>
@@ -69,7 +71,7 @@ int main(void) {
 	prepareBattleShipMap();
 	setShipsCoordinatesRandom("enemy");
 	placeMyShips();
-	
+
 	play();
 
 	return 0;
@@ -80,16 +82,16 @@ void play() {
 	userActive = true;
 
 	while (!gameOver) {
-		if (userActive) { 
-			userMove(); 
-		} else { 
-			botMove(); 
+		if (userActive) {
+			userMove();
+		} else {
+			botMove();
 		}
 
 		gameOver = gameIsOver();
 	}
 
-	system("cls");
+	system("clear");
 	if (userActive && gameOver) {
 		cout << "Congratulations, you win, see you next time!\n\n";
 	}
@@ -98,10 +100,14 @@ void play() {
 	}
 }
 
+void Sleep(int ms) {
+	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+}
+
 void userMove() {
 	int target;
 	bool gameOver = gameIsOver();
-	system("cls");
+	system("clear");
 
 	displayBothBattleShipsMap();
 	cout << "\nType enemy cell numbers to atack: ";
@@ -110,7 +116,7 @@ void userMove() {
 	int damage = checkDamage(target, "user");
 
 	while (userActive && damage != 0 && ! gameOver) {
-		system("cls");
+		system("clear");
 		displayBothBattleShipsMap();
 
 		cout << "Continue: ";
@@ -128,7 +134,7 @@ void botMove() {
 
 	targetRemains = deleteElementFromArray(posibleCoordinates, targetRemains, target);
 
-	system("cls");
+	system("clear");
 	displayBothBattleShipsMap();
 	cout << "\nIt's my turn...";
 	Sleep(1000);
@@ -164,7 +170,7 @@ void prepareBattleShipMap() {
 void placeMyShips() {
 
 	while (!sh1ArePlaced || !sh2ArePlaced || !sh3ArePlaced || !sh4ArePlaced) {
-		system("cls");
+		system("clear");
 		int setShipOption = displayOptionsMenu();
 
 		switch (setShipOption) {
@@ -279,7 +285,7 @@ int selectTargetCellBasedOnPreviousHit(int target, int damage) {
 			nrOfSelectedDir++;
 		}
 	}
-	
+
 	int newTarget = getTargetBasedOnDirection(row, col);
 
 	return newTarget;
@@ -340,11 +346,11 @@ int checkDamage(int target, string playerType) {
 	int row = getIndexOfElement(target, "x");
 	int col = getIndexOfElement(target, "y");
 	int damage; // damage = ship size
-	
-	if (playerType == "user") { damage = enemyBattleShipMap[row][col]; } 
+
+	if (playerType == "user") { damage = enemyBattleShipMap[row][col]; }
 	else { damage = userBattleShipMap[row][col]; }
 
-	if(damage <= 0) { 
+	if(damage <= 0) {
 		if (userShipDamaged == true && directionHitSuccess == true) {
 			lastHitDirection = hitDirection;
 			hitDirection = -1;
@@ -361,15 +367,15 @@ int checkDamage(int target, string playerType) {
 		switchPLayerActivity(playerType);
 
 		return 0;
-	} 
-	
+	}
+
 	if (playerType == "user") {
 		enemyShipsDamage[damage - 1] += 1;
 		enemyBattleShipMap[row][col] = -1; // mark damaged cells
 		cout << "You hit me\n";
 		Sleep(1500);
-	} 
-	
+	}
+
 	if (playerType == "bot") {
 		userShipsDamage[damage - 1] += 1;
 		userBattleShipMap[row][col] = -1;
@@ -417,7 +423,7 @@ void resetValues() {
 void placeShipsForUser() {
 	bool itsOk = false;
 	int option;
-	system("cls");
+	system("clear");
 
 	setShipsCoordinatesRandom("user");
 	displayUserShips();
@@ -432,7 +438,7 @@ void placeShipsForUser() {
 		if (option == 1) {
 			itsOk = true;
 		} else if(option == 2){
-			system("cls");
+			system("clear");
 			prepareBattleShipMap();
 			setShipsCoordinatesRandom("user");
 			displayUserShips();
@@ -501,14 +507,14 @@ void setShipsCoordinatesRandom(string playerType) {
 		bool isValid = checkCoordinatesPosition(coord, 1, -1, playerType);
 
 		if (isValid) {
-			if (playerType == "user") { 
-				userBattleShipMap[row][col] = 1; 
+			if (playerType == "user") {
+				userBattleShipMap[row][col] = 1;
 			} else { enemyBattleShipMap[row][col] = 1; }
 			i++;
 		}
 	}
 
-	// Set coordinates for ships from 2 or more cell 
+	// Set coordinates for ships from 2 or more cell
 	for (int i = 4; i >= 2; i--) {
 		setShipsCoordinatesBySize(i, playerType);
 	}
@@ -519,7 +525,7 @@ void setShipsCoordinatesBySize(int shipSize, string playerType) {
 	int shipCount = 4 - (shipSize - 1); // get ship length(nr. of cells) based on ship size
 
 	for (int i = 0; i < shipCount; ) {
-		int direction = rand() % 4 + 1; // generate random direction up-1 right-2 down-3 left-4 
+		int direction = rand() % 4 + 1; // generate random direction up-1 right-2 down-3 left-4
 
 		ship[0] = rand() % 9; // set random cell [x,y]
 		ship[1] = rand() % 9;
@@ -533,13 +539,13 @@ void setShipsCoordinatesBySize(int shipSize, string playerType) {
 			for (int k = 0; k < shipSize * 2; k += 2) {
 				if (playerType == "user") {
 					userBattleShipMap[ship[k]][ship[k + 1]] = shipSize;
-				} else { 
+				} else {
 					enemyBattleShipMap[ship[k]][ship[k + 1]] = shipSize;
 				}
 			}
 
 			i++;
-		} 
+		}
 	}
 }
 
@@ -560,7 +566,7 @@ void handleCoordinatesByDirection(int direction, int shipSize, int shipCoord[]) 
 				shipCoord[i + 1] = shipCoord[i - 1];
 				break;
 			case 4: // LEFT
-				shipCoord[i] = shipCoord[i - 2];  
+				shipCoord[i] = shipCoord[i - 2];
 				shipCoord[i + 1] = shipCoord[i - 1] - 1;
 				break;
 			default:
@@ -571,7 +577,7 @@ void handleCoordinatesByDirection(int direction, int shipSize, int shipCoord[]) 
 
 void addShipsCoordinates(int shipSize, int shipCount) {
 	int shipPosition;
-	system("cls");
+	system("clear");
 	printDeafultMap();
 
 	if (shipSize == 1) {
@@ -673,16 +679,16 @@ int getIndexOfElement(int elem, string pos) {
 }
 
 int deleteElementFromArray(int arr[], int length, int element){
-	int i;	
-	
-	// Search x in array 
+	int i;
+
+	// Search x in array
 	for (i = 0; i < length; i++) {
 		if (arr[i] == element) { break; }
 	}
 
-	// If x found in array 
+	// If x found in array
 	if (i < length) {
-		// reduce size of array and move all elements on space ahead 
+		// reduce size of array and move all elements on space ahead
 		length = length - 1;
 		for (int j = i; j < length; j++) {
 			arr[j] = arr[j + 1];
@@ -749,7 +755,7 @@ bool checkCoordinatesPosition(int coord[], int shipSize, int direction, string p
 			lastRow = coord[shipSize * 2 - 2];
 			lastCol = coord[shipSize * 2 - 1];
 		}
-		
+
 		for (int i = 0; i < shipSize * 2; i++) {
 			if(coord[i] < 0 || coord[i] > 9) {
 				return false;
@@ -891,14 +897,14 @@ void printBattleShipMapCellContent(int value, string type) {
 		printf("|");
 	}
 
-	if (type == "damaged") { 
+	if (type == "damaged") {
 		printf("\033[1m\033[31m");
-		printf(" X "); 
+		printf(" X ");
 		printf("\033[0m");
 		printf("|");
-	} else if (type == "visible") { 
+	} else if (type == "visible") {
 		printf("\033[1;34m");
-		printf(" %d ", value); 
+		printf(" %d ", value);
 		printf("\033[0m");
 		printf("|");
 	}
@@ -917,3 +923,5 @@ void printBattleShipMapFooter() {
 	cout << "_____________________________________________\n" << endl;
 	printf("\033[0m");
 }
+
+
